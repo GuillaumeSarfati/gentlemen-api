@@ -6,7 +6,7 @@ const request = require('request');
 const {GeoPoint} = require('loopback');
 const server = require('./server/server');
 
-const {User, Match} = server.models;
+const {Member, Match} = server.models;
 
 const geoData = fs.readFileSync('./data/geoPts.txt').toString();
 
@@ -23,7 +23,7 @@ request('https://randomuser.me/api/?results=1000', (err, res, body) => {
 
   const members = data.map((member) => {
     const position = geoPts[Math.floor(Math.random() * (999 - 0 + 1)) + 0];
-    const freshUser = {
+    const freshMember = {
       email: member.email,
       gender: member.gender,
       firstname: member.name.first,
@@ -34,8 +34,8 @@ request('https://randomuser.me/api/?results=1000', (err, res, body) => {
         member.picture.large,
       ],
     };
-    console.log(freshUser);
-    return freshUser;
+    console.log(freshMember);
+    return freshMember;
   });
-  User.create(members, (err) => console.log('creation done'));
+  Member.create(members, (err) => console.log('creation done'));
 });
