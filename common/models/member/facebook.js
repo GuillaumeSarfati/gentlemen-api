@@ -1,7 +1,6 @@
 'use strict';
 
 const async = require('async');
-const axios = require('axios');
 const request = require('request');
 
 module.exports = (Member) => {

@@ -26,7 +26,7 @@ module.exports = (Member) => {
         }, (err, matchs) => done(err, owner, matchs));
       },
       (owner, matchs, done) => {
-        const idNin = matchs.map((match) => match.memberId);
+        const idNin = matchs.map((match) => match.destId);
         idNin.push(owner.id);
         Member.find({
           where: {
