@@ -15,13 +15,7 @@
   },
   "User": {
     "dataSource": "mongoDb",
-    "public": true,
-    "acls": [{
-      "principalType": "ROLE",
-      "principalId": "$authenticated",
-      "permission": "ALLOW",
-      "property": "near"
-    }]
+    "public": false
   },
   "AccessToken": {
     "dataSource": "mongoDb",
@@ -43,6 +37,10 @@
     "public": false
   },
   "Match": {
+    "dataSource": "mongoDb",
+    "public": true
+  },
+  "Member": {
     "dataSource": "mongoDb",
     "public": true
   }
