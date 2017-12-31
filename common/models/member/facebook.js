@@ -8,9 +8,8 @@ module.exports = (Member) => {
     async.waterfall([
       (done) => Member.fetch(facebookAccessToken, done),
       // Another Middleware,
-    ], (err, member) => {
-      Member.connect(member, callback);
-    });
+      Member.connect,
+    ], callback);
   };
 
   Member.connect = (member, callback = () => {}) => {
@@ -23,20 +22,47 @@ module.exports = (Member) => {
   };
 
   Member.fetch = (facebookAccessToken, callback = () => {}) => {
+    console.log('Member fetch facebook', facebookAccessToken);
     async.waterfall([
       (done) => {
+        // Request for get pictures
+        // request.get({
+        //   url: 'https://graph.facebook.com/me/photos',
+        //   qs: {
+        //     type: 'uploaded',
+        //     access_token: facebookAccessToken,
+        //   },
+        // }, (err, res, body) => {
+        //   console.log(err, res.statusCode, body);
+        // });
         request.get({
-          url: 'https://graph.facebook.com/v2.3/me',
+          url: 'https://graph.facebook.com/me',
+          // ?access_token=${accessToken}&fields=id,name,picture.type(large)',
           qs: {
+            fields: 'id,name,first_name,gender,picture.type(large)',
             access_token: facebookAccessToken,
-            fields: 'id,name',
           },
           json: true,
         }, (err, res, newMember) => {
-          return done(err, newMember);
+          if (err || res.statusCode !== 200) {
+            return done(err || {
+              status: res.statusCode,
+              message: 'Unexpected error while trying to fetch facebook info',
+            });
+          }
+          return done(null, {
+            id: newMember.id,
+            fullname: newMember.name,
+            firstname: newMember.first_name,
+            gender: newMember.gender,
+            pictures: [
+              newMember.picture.data.url,
+            ],
+          });
         });
       },
       (newMember, done) => {
+        console.log(newMember);
         Member.findOne({
           where: {
             id: newMember.id,
@@ -44,7 +70,7 @@ module.exports = (Member) => {
         }, (err, member) => {
           if (member) {
             member.facebookAccessToken = facebookAccessToken;
-            return Member.upsert(member, callback);
+            return member.save(callback);
           }
           return done(err, newMember);
         });
@@ -70,7 +96,7 @@ module.exports = (Member) => {
     },
     http: {
       verb: 'post',
-      path: '/facebook/:id',
+      path: '/facebook/:facebookAccessToken',
     },
   });
 };
