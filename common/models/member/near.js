@@ -3,9 +3,9 @@
 const async = require('async');
 
 module.exports = (Member) => {
-  Member.near = (req, callback = () => {}) => {
+  Member.near = (req, lat, lng, callback = () => {}) => {
     const {Match} = Member.app.models;
-    console.log('NEAR ME', req.accessToken.userId);
+    console.log('NEAR ME', typeof lat, lat, typeof lng,  lng);
     async.waterfall([
       (done) => {
         Member.findById(req.accessToken.userId, (err, owner) => {
@@ -19,6 +19,7 @@ module.exports = (Member) => {
         });
       },
       (owner, done) => {
+        console.log('owner : ', owner);
         Match.find({
           where: {
             ownerId: owner.id,
@@ -34,7 +35,10 @@ module.exports = (Member) => {
               nin: idNin,
             },
             position: {
-              near: owner.position,
+              near: {
+                lat,
+                lng,
+              },
               maxDistance: 10,
             },
           },
@@ -53,6 +57,14 @@ module.exports = (Member) => {
           source: 'req',
         },
       },
+      {
+        arg: 'lat',
+        type: 'number',
+      },
+      {
+        arg: 'lng',
+        type: 'number',
+      },
     ],
     returns: {
       root: true,
@@ -61,7 +73,7 @@ module.exports = (Member) => {
     },
     http: {
       verb: 'get',
-      path: '/near',
+      path: '/near/:lat/:lng',
     },
   });
 };
